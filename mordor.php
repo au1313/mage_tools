@@ -74,17 +74,20 @@
                 'grand_total','shipping_amount','tax_amount','total_invoiced','total_paid','subtotal','order_currency_code',
                 'shipping_method','shipping_description',
             );
-
+            $pad = get_max_width($fields)+2;
             foreach ($fields as $f) {
-                echo $f.": ".$o->getData($f).PHP_EOL;
+                printf("%-'.{$pad}s %s\n",$f,$o->getData($f));
             }
             echo PHP_EOL;
         }
     }
 
-
-
-    echo "Done with orders.".PHP_EOL;
-
-
+    function get_max_width($fields) {
+        $len = 0;
+        foreach ($fields as $f) {
+            if ($len < strlen($f))
+                $len = strlen($f);
+        }
+        return $len;
+    }
 ?>
