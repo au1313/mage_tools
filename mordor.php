@@ -45,12 +45,12 @@
 
         foreach ($orders as $o) {
             $o = Mage::getModel('sales/order')->loadByIncrementId($o);
-            echo "Status history for order $o... ".PHP_EOL;
+            echo "Status history for order {$o->getIncrementId()}... ".PHP_EOL;
             $shist = $o->getStatusHistoryCollection(true);
             foreach ($shist as $hist) {
-                echo $hist->getData('status').": ".$hist->getData('created_at').
-                    ($hist->getData('is_customer_notified') == 1)?'(Customer notified)':'';
-                echo "\t".$hist->getData('comment').PHP_EOL;
+                printf("%-20s %s",$hist->getStatusLabel().':',time_utc_to_local($hist->getData('created_at')));
+                echo ($hist->getData('is_customer_notified') == 1)?' (Customer notified)':'';
+                echo "\t".$hist['comment'].PHP_EOL;
             }
         }
     }
@@ -82,6 +82,13 @@
             foreach ($fields as $f) {
                 printf("%-'.{$pad}s %s\n",$f,$o->getData($f));
             }
+            echo "Status History:".PHP_EOL;
+            $shist = $o->getStatusHistoryCollection(true);
+            foreach ($shist as $hist) {
+                printf("\t%-20s %s",$hist->getStatusLabel().':',time_utc_to_local($hist->getData('created_at')));
+                echo ($hist->getData('is_customer_notified') == 1)?' (Customer notified)':'';
+                echo "\t\t".$hist['comment'].PHP_EOL;
+            }
             echo PHP_EOL;
         }
     }
@@ -94,4 +101,12 @@
         }
         return $len;
     }
+
+
+    function time_utc_to_local($date) {
+        $dt = new DateTime($date, new DateTimeZone("UTC"));
+        $dt->setTimezone(new DateTimeZone("America/Detroit"));
+        return( $dt->format("F j, Y g:i a") );
+    }
+
 ?>
