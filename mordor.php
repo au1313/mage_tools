@@ -3,7 +3,7 @@
     Mage::app('admin');
 
     $longopts = array(
-        'rm::','show::','cancel::','history::',
+        'rm::','show::','cancel::','history::','fields::',
         'cast-into-the-fires::'               // I couldn't resist.
     );
     $opts = getopt("",$longopts);
@@ -74,6 +74,10 @@
                 'grand_total','shipping_amount','tax_amount','total_invoiced','total_paid','subtotal','order_currency_code',
                 'shipping_method','shipping_description',
             );
+
+            if ($opts['fields'])
+                $fields = explode(',',$opts['fields']);
+
             $pad = get_max_width($fields)+2;
             foreach ($fields as $f) {
                 printf("%-'.{$pad}s %s\n",$f,$o->getData($f));
