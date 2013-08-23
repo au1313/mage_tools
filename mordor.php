@@ -80,7 +80,7 @@
 
             $pad = get_max_width($fields)+2;
             foreach ($fields as $f) {
-                printf("%-'.{$pad}s %s\n",$f,$o->getData($f));
+                printf("%-{$pad}s %s\n",$f.':',$o->getData($f));
             }
             echo "Status History:".PHP_EOL;
             $shist = $o->getStatusHistoryCollection(true);
