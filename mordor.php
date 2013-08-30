@@ -14,8 +14,8 @@
         array_push($orders, explode(',',$opts['cast-into-the-fire']) );
 
         foreach ($orders as $o) {
-            echo "Deleting order $o... ";
             $o = Mage::getModel('sales/order')->loadByIncrementId($o);
+            echo "Deleting order {$o->getIncrementId()}... ";
             $o->delete();
             echo "done.".PHP_EOL;
         }
@@ -29,12 +29,12 @@
         foreach ($orders as $o) {
             $o = Mage::getModel('sales/order')->loadByIncrementId($o);
             if ($o->canCancel()) {
-                echo "Canceling order $o... ";
-                $o->cancel();
+                echo "Canceling order {$o->getIncrementId}... ";
+                $o->cancel()->save();
                 echo "done.".PHP_EOL;
             }
             else {
-                echo "Order $o is not cancelable.".PHP_EOL;
+                echo "Order {$o->getIncrementId()} is not cancelable.".PHP_EOL;
             }
         }
     }
