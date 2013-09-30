@@ -4,10 +4,88 @@
 
     $longopts = array(
         'rm::','show::','cancel::','history::','fields::',
-        'cast-into-the-fires::'               // I couldn't resist.
+        'cast-into-the-fires::',               // I couldn't resist.
+        'set-dates::','status::','date::',
     );
     $opts = getopt("",$longopts);
 
+    /**
+     *  This is ugly. I really have to clean this up, in terms of interface.
+     *  Right now, in addition to the actual statuses, the user can also say
+     *  'invoices', 'shipments', 'credit-memos', and 'created_at' to set
+     *  those dates. It also works on a few assumptions that I'd rather
+     *  not assume, but fits the particular case I'm writing this for.
+     *  
+     */
+    if($opts['set-dates']) {
+        if (!$opts['status']) {
+            echo "set-dates needs a status (--status) to set the date".PHP_EOL;
+            exit;
+        }
+        if (!$opts['date']) {
+            echo "set-dates needs a date (--date) to set".PHP_EOL;
+            exit;
+        }
+
+        $orders = array();
+        array_push($orders, explode(',',$opts['set-dates']) );
+
+        foreach ($orders as $ordernum) {
+            $o = Mage::getModel('sales/order')->loadByIncrementId($ordernum);
+
+            // Credit memos
+            if ($opts['status'] == 'credit-memos') {
+                $col = $o->getCreditmemoscollection();
+                foreach ($col as $i) {
+                    $i->setData('created_at',$opts['date'])->save();
+
+                    $comments = $i->getCommentsCollection();
+                    foreach($comments as $comm) {
+                        $comm->setData('created_at',$opts['date'])->save();
+                    }
+                }
+            }
+            // Invoices
+            if ($opts['status'] == 'invoices') {
+                $col = $o->getInvoiceCollection();
+                foreach($col as $i) {
+                    $i->setData('created_at',$opts['date'])->save();
+
+                    $cmcomments = $i->getCommentsCollection();
+                    foreach($comments as $comm) {
+                        $comm->setData('created_at',$opts['date'])->save();
+                    }
+                }
+            }
+
+            // Shipments
+            if ($opts['status'] == 'shipments') {
+                $col = $o->getShipmentsCollection();
+                foreach($col as $i) {
+                    $i->setData('created_at',$opts['date'])->save();
+
+                    $comments = $i->getCommentsCollection();
+                    foreach($comments as $comm) {
+                        $comm->setData('created_at',$opts['date'])->save();
+                    }
+                }
+            }
+
+            // Status History
+            $col = $o->getStatusHistoryCollection(true);
+            foreach ($col as $h) {
+                if (preg_match("/Refunded amount of/i",$h->getData('comment')) && $opts['status'] == 'credit-memos') {
+                    $h->setData('created_at', $opts['date'])->save();
+                }
+                else if ($h->getData('status') == $opts['status']) {
+                    $h->setData('created_at',$opts['date'])->save();
+                }
+            }
+
+        }
+    }
+
+    
     if($opts['rm'] || $opts['cast-into-the-fire']) {
         $orders = array();
         array_push($orders, explode(',',$opts['rm']) );
