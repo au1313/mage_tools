@@ -146,11 +146,11 @@
             echo "Information for order $oid: ".PHP_EOL;
 
             $fields = array(
-                'entity_id','increment_id','created_at','updated_at','store_id','customer_id','quote_id',
+                'entity_id','increment_id','status','state','created_at','updated_at','store_id','customer_id','quote_id',
                 'customer_email','customer_firstname','customer_middlename','customer_lastname',
                 'customer_prefix','customer_suffix',
                 'grand_total','shipping_amount','tax_amount','total_invoiced','total_paid','subtotal','order_currency_code',
-                'shipping_method','shipping_description',
+                'shipping_method','shipping_description','tax_amount','shipping_amount'
             );
 
             if ($opts['fields'])
@@ -160,6 +160,24 @@
             foreach ($fields as $f) {
                 printf("%-{$pad}s %s\n",$f.':',$o->getData($f));
             }
+
+            $odata    = $o->getData();
+            $tax      = $odata['tax_amount'];
+            $shipping = $odata['shipping_amount'];
+
+            echo "Items: ".PHP_EOL;
+            $items = $o->getAllItems();
+            foreach ($items as $i) {
+                echo "\t".$i->getName()." (Product ID ".$i->getProductId().")".PHP_EOL;
+                echo "\t\tStatus: ".$i->getStatus().PHP_EOL;
+                echo "\t\tQty To Cancel: ".$i->getQtyToCancel().PHP_EOL;
+                echo "\t\tQty To Invoice: ".$i->getQtyToInvoice().PHP_EOL;
+                echo "\t\tQty To Refund: ".$i->getQtyToRefund().PHP_EOL;
+                echo "\t\tQty To Ship: ".$i->getQtyToShip().PHP_EOL;
+                echo "\t\tID: ".$i->getId().PHP_EOL;
+            }
+            echo PHP_EOL;
+
             echo "Status History:".PHP_EOL;
             $shist = $o->getStatusHistoryCollection(true);
             foreach ($shist as $hist) {
